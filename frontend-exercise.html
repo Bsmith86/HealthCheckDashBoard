@@ -76,7 +76,8 @@
     return (
       <div className="chart-container">
         {data.map((value, index) => (
-          <div className="bar" key={index} style={{ height: barHeight(value) }}></div>
+          <div className="bar" key={index} style={{ height: barHeight(value) }}>{value}</div>
+          
         ))}
       </div>
     );
