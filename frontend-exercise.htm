@@ -1,0 +1,130 @@
+<!--
+# JobTread Frontend Exercise
+
+The goal of this exercise is to create a live health check dashboard for the
+JobTread API. The dashboard should show the API version and a bar chart of the
+last 10 response times (in milliseconds) of simple GET requests to
+https://api.jobtread.com/healthz, updated every second.
+
+For example (not to scale):
+
+          JobTread API Version abc123
+
+               ---- ---- ----      ----
+     ----      ---- ---- ---- ---- ----      ----
+---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+---- ---- ---- ---- ---- ---- ---- ---- ---- ----
+22.1 23.3 22.2 25.3 26.7 26.5 23.9 26.3 22.2 23.3
+
+Requirements:
+- Render your root component to the `root` <div> provided below.
+- No external CSS or JavaScript should be imported besides the React and
+  ReactDOM libraries already included below.
+- Include all of your CSS and JavaScript in this file in the <style> and
+  <script> tags below.
+- The entirety of the completed exercise should be contained in this file.
+- The dashboard should run correctly in the latest version of Chrome when served
+  from the file protocol. Other browsers do not need to be tested for this
+  exercise.
+- The dashboard should be responsive to different screen widths.
+- Feel free to present the data in additional ways as well, if you choose.
+- Your submission will be evaluated on both visual design and code quality.
+-->
+
+<!doctype html>
+<meta charset='utf-8'>
+<title>JobTread Frontend Exercise</title>
+<script
+  src='https://unpkg.com/react@18/umd/react.development.js'
+  crossorigin
+></script>
+<script
+  src='https://unpkg.com/react-dom@18/umd/react-dom.development.js'
+  crossorigin
+></script>
+
+<div id='root'>
+</div>
+
+<style>
+  /* TODO: Add your CSS here */
+</style>
+
+<script>
+  // TODO: Add your JavaScript here
+  import React, { useState, useEffect } from 'react';
+  import axios from 'axios';
+
+const HealthCheckDashboard = () => {
+  const [apiVersion, setApiVersion] = useState('');
+  const [responseTimes, setResponseTimes] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('https://api.jobtread.com/healthz', {
+          // headers: { 'x-api-key': 'your-api-key' },
+        });
+        setApiVersion(response.data.version);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchResponseTime = async () => {
+      try {
+        const startTime = new Date().getTime();
+        const response = await axios.get('https://api.jobtread.com/healthz', {
+          // headers: { 'x-api-key': 'your-api-key' },
+        });
+        const endTime = new Date().getTime();
+        const responseTime = endTime - startTime;
+        setResponseTimes((prevResponseTimes) => [
+          ...prevResponseTimes.slice(-9),
+          responseTime,
+        ]);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    const interval = setInterval(() => {
+      fetchResponseTime();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className="HealthCheckDashboard">
+      <h1>Health Check Dashboard</h1>
+      <p>API Version: {apiVersion}</p>
+      <h2>Last 10 Response Times (ms)</h2>
+      <ul>
+        {responseTimes.map((time, index) => (
+          <li key={index}>{time}</li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default HealthCheckDashboard;
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+
+root.render(
+  <React.StrictMode>
+      <Router>
+        <HealthCheckDashboard />
+      </Router>
+  </React.StrictMode>
+);
+
+</script>
